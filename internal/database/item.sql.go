@@ -63,7 +63,7 @@ func (q *Queries) DeleteItem(ctx context.Context, id int32) error {
 	return err
 }
 
-const getItem = `-- name: GetItem :many
+const getItems = `-- name: GetItems :many
 SELECT 
     i.id AS "ID", 
     c.name AS "CategoryName", 
@@ -75,10 +75,9 @@ SELECT
     i.updated_at
 FROM item i
 JOIN category c ON i.category_id = c.id
-WHERE i.id = $1
 `
 
-type GetItemRow struct {
+type GetItemsRow struct {
 	ID           int32
 	CategoryName string
 	CategoryID   int32
@@ -89,15 +88,15 @@ type GetItemRow struct {
 	UpdatedAt    sql.NullTime
 }
 
-func (q *Queries) GetItem(ctx context.Context, id int32) ([]GetItemRow, error) {
-	rows, err := q.db.QueryContext(ctx, getItem, id)
+func (q *Queries) GetItems(ctx context.Context) ([]GetItemsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getItems)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetItemRow
+	var items []GetItemsRow
 	for rows.Next() {
-		var i GetItemRow
+		var i GetItemsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CategoryName,

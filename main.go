@@ -44,6 +44,11 @@ func main() {
 	serve_mux.HandleFunc("PUT /category", apiconfig.HandleUpdateCategory)
 	serve_mux.HandleFunc("DELETE /category", apiconfig.HandleDeleteCategory)
 
+	serve_mux.HandleFunc("GET /item", apiconfig.HandleGetItems)
+	serve_mux.HandleFunc("POST /item", apiconfig.HandleCreateItem)
+	serve_mux.HandleFunc("PUT /item", apiconfig.HandleUpdateItem)
+	serve_mux.HandleFunc("DELETE /item", apiconfig.HandleDeleteItem)
+
 	// Wrap the mux with the CORS middleware
 	corsHandler := enableCORS(serve_mux)
 

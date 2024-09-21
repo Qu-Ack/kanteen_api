@@ -3,7 +3,7 @@ INSERT INTO item (name, category_id, price, stock)
 VALUES ($1, $2, $3, $4)
 RETURNING id AS "ID", category_id AS "CategoryID", name AS "Name", price AS "Price", stock AS "Stock", created_at, updated_at;
 
--- name: GetItem :many
+-- name: GetItems :many
 SELECT 
     i.id AS "ID", 
     c.name AS "CategoryName", 
@@ -14,8 +14,8 @@ SELECT
     i.created_at, 
     i.updated_at
 FROM item i
-JOIN category c ON i.category_id = c.id
-WHERE i.id = $1;
+JOIN category c ON i.category_id = c.id;
+
 
 -- name: UpdateItem :exec
 UPDATE item
