@@ -39,6 +39,8 @@ func main() {
 		DB: dbQueries,
 	}
 
+	serve_mux.HandleFunc("/ws", apiconfig.HandleWebSocketConn)
+
 	serve_mux.HandleFunc("GET /category", apiconfig.HandleGetCategories)
 	serve_mux.HandleFunc("POST /category", apiconfig.HandlePostCategory)
 	serve_mux.HandleFunc("PUT /category", apiconfig.HandleUpdateCategory)
@@ -48,6 +50,8 @@ func main() {
 	serve_mux.HandleFunc("POST /item", apiconfig.HandleCreateItem)
 	serve_mux.HandleFunc("PUT /item", apiconfig.HandleUpdateItem)
 	serve_mux.HandleFunc("DELETE /item", apiconfig.HandleDeleteItem)
+
+	serve_mux.HandleFunc("POST /order", apiconfig.HandlePostOrder)
 
 	// Wrap the mux with the CORS middleware
 	corsHandler := enableCORS(serve_mux)
