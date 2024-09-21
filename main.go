@@ -1,13 +1,20 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/Qu-Ack/kanteen_api/internal/database"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
+
+type apiConfig struct {
+	DB *database.Queries
+}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -16,13 +23,24 @@ func main() {
 	}
 
 	PORT := os.Getenv("PORT")
-	_ = os.Getenv("DB_STRING")
+	DB_STRING := os.Getenv("DB_STRING")
 
 	serve_mux := http.NewServeMux()
 
-	serve_mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello world"))
-	})
+	db, err := sql.Open("postgres", DB_STRING)
+
+	if err != nil {
+		log.Println("Error while opening DB")
+		return
+	}
+
+	dbQueries := database.New(db)
+
+	apiconfig := apiConfig{
+		DB: dbQueries,
+	}
+
+	serve_mux.HandleFunc("GET /", apiconfig.HandleGetCategories)
 
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%v", PORT),
