@@ -28,7 +28,6 @@ func main() {
 	serve_mux := http.NewServeMux()
 
 	db, err := sql.Open("postgres", DB_STRING)
-
 	if err != nil {
 		log.Println("Error while opening DB")
 		return
@@ -45,11 +44,30 @@ func main() {
 	serve_mux.HandleFunc("PUT /category", apiconfig.HandleUpdateCategory)
 	serve_mux.HandleFunc("DELETE /category", apiconfig.HandleDeleteCategory)
 
+	// Wrap the mux with the CORS middleware
+	corsHandler := enableCORS(serve_mux)
+
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%v", PORT),
-		Handler: serve_mux,
+		Handler: corsHandler,
 	}
 
 	log.Println(fmt.Sprintf("Server started on PORT %v", PORT))
 	server.ListenAndServe()
+}
+
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Adjust to your needs
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Handle preflight requests
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

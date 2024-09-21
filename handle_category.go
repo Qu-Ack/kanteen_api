@@ -10,6 +10,7 @@ import (
 )
 
 func (apiconfig apiConfig) HandleGetCategories(w http.ResponseWriter, r *http.Request) {
+
 	categories, err := apiconfig.DB.GetCategories(r.Context())
 	if err != nil {
 		log.Println("Error In HandleGetCategories while getting categories from DB", err)
