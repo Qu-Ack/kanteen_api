@@ -40,7 +40,10 @@ func main() {
 		DB: dbQueries,
 	}
 
-	serve_mux.HandleFunc("GET /", apiconfig.HandleGetCategories)
+	serve_mux.HandleFunc("GET /category", apiconfig.HandleGetCategories)
+	serve_mux.HandleFunc("POST /category", apiconfig.HandlePostCategory)
+	serve_mux.HandleFunc("PUT /category", apiconfig.HandleUpdateCategory)
+	serve_mux.HandleFunc("DELETE /category", apiconfig.HandleDeleteCategory)
 
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%v", PORT),
