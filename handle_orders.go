@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -40,8 +39,15 @@ func (apiconfig apiConfig) HandlePostOrder(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	for key, value := range json_body.Items {
-		fmt.Println(fmt.Sprintf("%v: %v", key, value.Name))
+	if SocketHandler.master != nil {
+		err := SocketHandler.master.WriteJSON(json_body)
+		if err != nil {
+			log.Println("Error In HandlePostOrder while sending data to socket client", err)
+			return
+		}
+		log.Println("message sent success")
+	} else {
+		log.Println("Error In HandlePostOrder websocket conn not established")
 	}
 
 	WriteJSON(w, 201, map[string]string{"status": "ok"})

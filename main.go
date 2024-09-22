@@ -8,12 +8,14 @@ import (
 	"os"
 
 	"github.com/Qu-Ack/kanteen_api/internal/database"
+	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
-	DB *database.Queries
+	DB     *database.Queries
+	master *websocket.Conn
 }
 
 func main() {

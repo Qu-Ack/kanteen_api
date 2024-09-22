@@ -15,12 +15,18 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type socketStruct struct {
+	master *websocket.Conn
+}
+
+var SocketHandler = &socketStruct{}
+
 func (apiconfig apiConfig) HandleWebSocketConn(w http.ResponseWriter, r *http.Request) {
-	_, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("error while connecting to socket server", err)
 		return
-
 	}
+	SocketHandler.master = conn
 
 }
