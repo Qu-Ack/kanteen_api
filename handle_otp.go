@@ -179,13 +179,11 @@ func (apiconfig apiConfig) HandleVerifyOTP(w http.ResponseWriter, r *http.Reques
 	})
 
 	if err != nil {
-		log.Println("Error In HandleGetOTP while getting things from db", err)
-		WriteJSONError(w, 500, "Internal Server Error")
-		return
+		log.Println("Error In HandleGetOTP while creating things from db", err)
 
 	}
 
-	WriteJSON(w, 200, map[string]string{"status": "success", "user_id": user.ID.UUID.String()})
+	WriteJSON(w, 200, map[string]string{"status": "success", "user_id": user.ID.UUID.String(), "name": user.Name, "mobile": user.Phone})
 
 	// we need to get the otp and the number that was stored in our server
 	// we need to verify the match the otp sent by the client with the server's otp

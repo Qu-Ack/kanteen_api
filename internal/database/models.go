@@ -27,19 +27,19 @@ type Item struct {
 
 type Order struct {
 	ID        int32
-	UserID    uuid.NullUUID
-	Total     sql.NullString
-	Status    sql.NullString
+	UserID    uuid.UUID
+	Total     string
+	Status    string
 	CreatedAt sql.NullTime
 }
 
 type Orderitem struct {
 	ID               int32
-	OrderID          sql.NullInt32
-	ItemID           sql.NullInt32
-	TakeawayQuantity sql.NullInt32
-	EatinQuantity    sql.NullInt32
-	Price            sql.NullString
+	OrderID          int32
+	ItemID           int32
+	TakeawayQuantity int32
+	EatinQuantity    int32
+	Price            string
 }
 
 type Otp struct {
