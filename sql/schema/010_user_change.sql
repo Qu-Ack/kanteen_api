@@ -1,0 +1,5 @@
+-- +goose Up
+ALTER TABLE users
+DROP COLUMN IF EXISTS email,
+DROP COLUMN IF EXISTS password,
+ADD COLUMN phone VARCHAR(15) UNIQUE;

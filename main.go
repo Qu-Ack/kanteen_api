@@ -53,6 +53,9 @@ func main() {
 	serve_mux.HandleFunc("PUT /item", apiconfig.HandleUpdateItem)
 	serve_mux.HandleFunc("DELETE /item", apiconfig.HandleDeleteItem)
 
+	serve_mux.HandleFunc("POST /otp", apiconfig.HandleCreateOTP)
+	serve_mux.HandleFunc("POST /verifyotp", apiconfig.HandleVerifyOTP)
+
 	serve_mux.HandleFunc("POST /order", apiconfig.HandlePostOrder)
 
 	// Wrap the mux with the CORS middleware

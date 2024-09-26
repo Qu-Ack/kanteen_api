@@ -39,6 +39,7 @@ func (apiconfig apiConfig) HandlePostOrder(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// sending data to the web client
 	if SocketHandler.master != nil {
 		err := SocketHandler.master.WriteJSON(json_body)
 		if err != nil {

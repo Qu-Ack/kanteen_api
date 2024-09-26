@@ -1,0 +1,4 @@
+-- +goose Up
+ALTER TABLE users
+ALTER COLUMN name SET NOT NULL,
+ALTER COLUMN phone SET NOT NULL;

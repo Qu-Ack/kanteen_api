@@ -6,6 +6,8 @@ package database
 
 import (
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 type Category struct {
@@ -25,7 +27,7 @@ type Item struct {
 
 type Order struct {
 	ID        int32
-	UserID    sql.NullInt32
+	UserID    uuid.NullUUID
 	Total     sql.NullString
 	Status    sql.NullString
 	CreatedAt sql.NullTime
@@ -40,9 +42,14 @@ type Orderitem struct {
 	Price            sql.NullString
 }
 
+type Otp struct {
+	ID     uuid.UUID
+	Mobile string
+	Otp    string
+}
+
 type User struct {
-	ID       int32
-	Name     sql.NullString
-	Email    sql.NullString
-	Password sql.NullString
+	Name  string
+	Phone string
+	ID    uuid.NullUUID
 }
