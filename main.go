@@ -57,6 +57,8 @@ func main() {
 	serve_mux.HandleFunc("POST /verifyotp", apiconfig.HandleVerifyOTP)
 
 	serve_mux.HandleFunc("POST /order", apiconfig.HandlePostOrder)
+	serve_mux.HandleFunc("GET /order", apiconfig.HandleGetPendingOrder)
+	serve_mux.HandleFunc("GET /order/{ORDERID}", apiconfig.HandleGetOrder)
 
 	// Wrap the mux with the CORS middleware
 	corsHandler := enableCORS(serve_mux)

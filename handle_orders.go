@@ -21,12 +21,46 @@ type Item struct {
 	ServiceType      string `json:"serviceType"`
 }
 
+func (apiconfig apiConfig) HandleGetOrder(w http.ResponseWriter, r *http.Request) {
+	order_id := r.PathValue("ORDERID")
+	int_order_id, err := strconv.Atoi(order_id)
+	if err != nil {
+		log.Println("Error In HandleGetOrder while converting id to int", err)
+		WriteJSONError(w, 500, "Internal Server Error")
+		return
+	}
+	order, err := apiconfig.DB.GetOrder(r.Context(), int32(int_order_id))
+
+	if err != nil {
+		log.Println("Error In HandleGetOrder while getting order from db", err)
+		WriteJSONError(w, 500, "Internal Server Error")
+		return
+	}
+
+	order_items, err := apiconfig.DB.GetOrderItemsForOrder(r.Context(), int32(int_order_id))
+
+	if err != nil {
+		log.Println("Error In HandleGetOrder while getting order items", err)
+		WriteJSONError(w, 500, "Internal Server Error")
+		return
+	}
+
+	WriteJSON(w, 200, map[string]any{
+		"order_id":     order.OrderID,
+		"user_name":    order.UserName,
+		"user_mobile":  order.UserMobile,
+		"total":        order.Total,
+		"order_status": order.OrderStatus,
+		"items":        order_items,
+	})
+
+}
+
 func (apiconfig apiConfig) HandlePostOrder(w http.ResponseWriter, r *http.Request) {
 	type body struct {
 		UserId string          `json:"user_id"`
 		Items  map[string]Item `json:"items"`
 	}
-
 	byte_body, err := io.ReadAll(r.Body)
 
 	if err != nil {
@@ -56,13 +90,17 @@ func (apiconfig apiConfig) HandlePostOrder(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	our_user, err := apiconfig.DB.GetUserByID(r.Context(), uuid.NullUUID{
+		UUID:  user_uuid,
+		Valid: true,
+	})
+
 	order, err := apiconfig.DB.CreateOrder(r.Context(), database.CreateOrderParams{
 		UserID: user_uuid,
 		Total:  total_string,
 		Status: "pending",
 	})
 
-	// Use a WaitGroup to wait for all insertions to complete
 	var wg sync.WaitGroup
 	for _, item := range json_body.Items {
 		wg.Add(1)
@@ -87,9 +125,8 @@ func (apiconfig apiConfig) HandlePostOrder(w http.ResponseWriter, r *http.Reques
 
 	wg.Wait()
 
-	// sending data to the web client
 	if SocketHandler.master != nil {
-		err := SocketHandler.master.WriteJSON(json_body)
+		err := SocketHandler.master.WriteJSON(map[string]any{"user_id": json_body.UserId, "order_id": order.ID, "user_mobile": our_user.Phone, "user_name": our_user.Name})
 		if err != nil {
 			log.Println("Error In HandlePostOrder while sending data to socket client", err)
 			return
@@ -99,7 +136,20 @@ func (apiconfig apiConfig) HandlePostOrder(w http.ResponseWriter, r *http.Reques
 		log.Println("Error In HandlePostOrder websocket conn not established")
 	}
 
-	WriteJSON(w, 201, map[string]string{"status": "ok"})
+	WriteJSON(w, 201, map[string]any{"status": "ok", "order_id": order.ID})
+
+}
+
+func (apiconfig apiConfig) HandleGetPendingOrder(w http.ResponseWriter, r *http.Request) {
+	orders, err := apiconfig.DB.GetPendingOrders(r.Context())
+
+	if err != nil {
+		log.Println("Error In HandleGetPendingOrder while fetching orders")
+		WriteJSONError(w, 500, "Internal Server Error")
+		return
+	}
+
+	WriteJSON(w, 500, orders)
 
 }
 

@@ -45,3 +45,14 @@ func (q *Queries) GetUser(ctx context.Context, phone string) (User, error) {
 	err := row.Scan(&i.Name, &i.Phone, &i.ID)
 	return i, err
 }
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT name, phone, id from users where id = $1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.NullUUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(&i.Name, &i.Phone, &i.ID)
+	return i, err
+}

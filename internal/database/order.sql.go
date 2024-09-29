@@ -37,18 +37,94 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 }
 
 const getOrder = `-- name: GetOrder :one
-SELECT id, user_id, total, status, created_at from orders where id = $1
+SELECT 
+  orders.id as order_id, 
+  orders.status as order_status, 
+  orders.total as total, 
+  u.name AS user_name, 
+  u.phone AS user_mobile 
+FROM 
+  orders 
+JOIN 
+  users u ON orders.user_id = u.id 
+WHERE 
+  orders.id = $1
 `
 
-func (q *Queries) GetOrder(ctx context.Context, id int32) (Order, error) {
+type GetOrderRow struct {
+	OrderID     int32
+	OrderStatus string
+	Total       string
+	UserName    string
+	UserMobile  string
+}
+
+func (q *Queries) GetOrder(ctx context.Context, id int32) (GetOrderRow, error) {
 	row := q.db.QueryRowContext(ctx, getOrder, id)
-	var i Order
+	var i GetOrderRow
 	err := row.Scan(
-		&i.ID,
-		&i.UserID,
+		&i.OrderID,
+		&i.OrderStatus,
 		&i.Total,
-		&i.Status,
-		&i.CreatedAt,
+		&i.UserName,
+		&i.UserMobile,
 	)
 	return i, err
+}
+
+const getPendingOrders = `-- name: GetPendingOrders :many
+
+
+SELECT 
+  orders.id as order_id, 
+  orders.status as order_status, 
+  orders.total as total, 
+  u.name AS user_name, 
+  u.phone AS user_mobile 
+FROM 
+  orders 
+JOIN 
+  users u ON orders.user_id = u.id 
+WHERE 
+  orders.status = 'pending' 
+ORDER BY 
+  orders.created_at DESC
+`
+
+type GetPendingOrdersRow struct {
+	OrderID     int32
+	OrderStatus string
+	Total       string
+	UserName    string
+	UserMobile  string
+}
+
+// Ensure 'orders.id' is used to avoid ambiguity
+func (q *Queries) GetPendingOrders(ctx context.Context) ([]GetPendingOrdersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPendingOrders)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPendingOrdersRow
+	for rows.Next() {
+		var i GetPendingOrdersRow
+		if err := rows.Scan(
+			&i.OrderID,
+			&i.OrderStatus,
+			&i.Total,
+			&i.UserName,
+			&i.UserMobile,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
